@@ -1,0 +1,27 @@
+[Unit]
+Description=Valheim Server
+After=docker.service
+Requires=docker.service
+RequiresMountsFor=/mnt/gamedata
+ConditionPathExists=/etc/valheim-server.env
+
+[Service]
+TimeoutStartSec=0
+TimeoutStopSec=150
+ExecStartPre=-/usr/bin/docker rm -f %n
+ExecStart=/usr/bin/docker run \
+          --name %n \
+          --rm \
+          --cap-add=sys_nice \
+          --stop-timeout 120 \
+          -v /mnt/gamedata/config:/config \
+          -v /mnt/gamedata/server:/opt/valheim \
+          -p 2456-2457:2456-2457/udp \
+          --env-file /etc/valheim-server.env \
+          lloesche/valheim-server
+ExecStop=/usr/bin/docker stop %n
+Restart=on-failure
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target

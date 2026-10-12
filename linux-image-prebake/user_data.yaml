@@ -1,0 +1,10 @@
+#cloud-config
+hostname: valheim-arch-vps
+
+users:
+  - name: <username>
+    groups: [wheel]
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh_authorized_keys:
+      - ssh-ed25519 <ssh key>

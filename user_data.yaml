@@ -1,0 +1,29 @@
+#cloud-config
+hostname: valheim-arch-vps
+
+users:
+  - name: <username>
+    groups: [wheel]
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh_authorized_keys:
+      - ssh-ed25519 <ssh key>
+
+mounts:
+  - [ /dev/disk/by-id/scsi-0DO_Volume_<volumename>, /mnt/gamedata, ext4, "defaults,nofail,discard", "0", "2" ]
+
+write_files:
+  - path: /etc/valheim-server.env
+    permissions: '0600'
+    content: |
+      SERVER_NAME=Valheim Server
+      SERVER_PORT=2456
+      WORLD_NAME=<worldname>
+      SERVER_PASS=<password>
+      SERVER_PUBLIC=false
+
+runcmd:
+  - resize2fs /dev/disk/by-id/scsi-0DO_Volume_<volumename>
+  - systemctl enable --now sshd ufw fail2ban
+  - mkdir -p /mnt/gamedata/config /mnt/gamedata/server
+  - systemctl start valheim.service
