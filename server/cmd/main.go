@@ -19,9 +19,11 @@ const PORT = ":8080"
 
 func init() {
 	server := server.New()
+	//defer server.Close()
 	mux := http.NewServeMux()
 	mux.Handle("POST /login", http.HandlerFunc(server.LoginHandler))
-	mux.Handle("GET /status", server.AuthMiddleware(ProtectedHandler) )
+	mux.Handle("GET /status", server.AuthMiddleware(server.StatusHandler))
+	mux.Handle("GET /test", server.AuthMiddleware(ProtectedHandler))
 
 	fmt.Printf("Server Starting on %s\n", PORT)
 	go func() {
@@ -99,7 +101,5 @@ func main() {
 	c := New("admin", "password")
 	res,_ := c.GetStatus()
 	fmt.Println(string(res))
-
-
 }
 
