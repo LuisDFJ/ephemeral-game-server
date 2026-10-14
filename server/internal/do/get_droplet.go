@@ -24,6 +24,8 @@ func NewVPS( droplet godo.Droplet ) VPS {
 
 func (c *Client) GetDroplet() (VPS, error) {
 	var vps VPS
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	droplets, _, err := c.client.Droplets.List(c.ctx, &godo.ListOptions{})
 	if err != nil {
 		return vps, fmt.Errorf("failed to list droplets: %v\n", err)

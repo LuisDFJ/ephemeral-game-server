@@ -1,30 +1,10 @@
 package server
 
 import (
-	"fmt"
 	"os"
-	"strings"
-
+	"fmt"
 	"github.com/joho/godotenv"
 )
-
-func load_one_time_tokens() []string {
-	tokens := []string{}
-	content,err := os.ReadFile("token.env")
-	if err == nil {
-		for _,s := range strings.Split(string(content), "\n") {
-			tokens = append(tokens, s)
-		}
-	}
-	return tokens
-}
-
-func save_one_time_tokens(tokens []string) {
-	err := os.WriteFile("tokens.env", []byte(strings.Join(tokens,"\n")), 0644)
-	if err != nil {
-		fmt.Printf("Error saving tokens.env: %s", err.Error())
-	}
-}
 
 func load_tokens() (string,string,error) {
 	var dot,cft string

@@ -27,7 +27,7 @@ func (s *Server) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if cred.Username != "admin" || cred.Password != "password" {
+	if err := s.db.AuthUser(cred.Username, cred.Password); err != nil {
 		http.Error(w, "Unauthorized: Invalid username or password", http.StatusUnauthorized)
 		return
 	}

@@ -1,13 +1,13 @@
 package server
 
 import (
-	"sync"
 	"os"
 	"fmt"
-	"crypto/rsa"
 	"crypto/rand"
-	"server/internal/do"
+	"crypto/rsa"
 	"server/internal/cf"
+	"server/internal/do"
+	"server/internal/server/db"
 )
 
 
@@ -17,12 +17,11 @@ func fatal(s string) {
 }
 
 type Server struct {
-	mu sync.Mutex
 	key *rsa.PrivateKey
 	pub *rsa.PublicKey
-	ott []string
 	doc do.Client
 	cfc cf.Client
+	db *db.DB
 }
 
 func New() Server {
@@ -30,15 +29,18 @@ func New() Server {
 	if err != nil { fatal("error generating key") }
 	dot,cft,err := load_tokens()
 	if err != nil { fatal(err.Error()) }
+	db,err := db.New()
+	if err != nil { fatal(err.Error()) }
 	return Server{
 		key: key,
 		pub: &key.PublicKey,
-		ott: load_one_time_tokens(),
 		doc: do.New(dot),
 		cfc: cf.New(cft),
+		db: db,
 	}
 }
 
 func (s *Server) Close() {
-	save_one_time_tokens(s.ott)
+	fmt.Println("Closing Server")
+	s.db.Close()
 }
