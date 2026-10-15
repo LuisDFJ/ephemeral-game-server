@@ -1,4 +1,4 @@
-package cf
+package claudflare
 
 type Client struct {
 	pat string

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"crypto/rand"
 	"crypto/rsa"
-	"server/internal/cf"
-	"server/internal/do"
+	cf "server/internal/claudflare"
+	do "server/internal/digitalocean"
 	"server/internal/server/db"
 )
 

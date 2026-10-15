@@ -1,4 +1,4 @@
-package do
+package digitalocean
 
 import (
 	"sync"
@@ -8,6 +8,7 @@ import (
 
 const VALHEIM_IMAGE string = "valheim-arch-do"
 const VALHEIM_DROPLET string = "valheim-server"
+const VALHEIM_VOLUME string = "volume-nyc1-valheim"
 const REGION string = "nyc1"
 const MAX_PRICE float64 = 75.0
 

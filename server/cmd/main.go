@@ -48,6 +48,8 @@ func _main() {
 	fmt.Println(string(res))
 	res,_ = c.GetSizes()
 	fmt.Println(string(res))
+	res,_ = c.PostCreateVps("x-2vcpu-4gb", "World", "password.1234")
+	fmt.Println(string(res))
 }
 
 func fatal(err error) {

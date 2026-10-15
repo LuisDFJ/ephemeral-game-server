@@ -31,6 +31,12 @@ type Registration struct {
 	Password string `json:"password"`
 }
 
+type CreateVPS struct {
+	Slug string `json:"slug"`
+	WorldName string `json:"worldname"`
+	WorldPswd string `json:"worldpswd"`
+}
+
 func Register(ott string, username string, password string, port string) error {
 	c := Client{ port:port }
 	res, err := c.post("register",Registration{Username:username, Password:password, Ott:ott}, false)
@@ -84,6 +90,10 @@ func (c *Client) post(slug string, b any, jwt bool) ([]byte, error) {
 		e = fmt.Errorf(response.Status)
 	}
 	return body,e
+}
+
+func (c *Client) PostCreateVps( slug string, world_name string, world_pswd string ) ([]byte, error) {
+	return c.post("create-vps", CreateVPS{Slug: slug, WorldName: world_name, WorldPswd: world_pswd}, true)
 }
 
 func (c *Client) GetStatus() ([]byte, error) {

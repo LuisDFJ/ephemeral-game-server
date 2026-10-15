@@ -1,4 +1,4 @@
-package do
+package digitalocean
 
 import (
 	"fmt"
