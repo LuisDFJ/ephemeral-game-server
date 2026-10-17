@@ -2,18 +2,10 @@ package server
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	do "server/internal/digitalocean"
 	userdata "server/internal/user_data"
-	"time"
 )
-
-type CreateVPS struct {
-	Slug string `json:"slug"`
-	WorldName string `json:"worldname"`
-	WorldPswd string `json:"worldpswd"`
-}
 
 func (s *Server) CreateVPSHandler( w http.ResponseWriter, r *http.Request ) {
 	var params CreateVPS
@@ -59,7 +51,7 @@ func (s *Server) CreateVPSHandler( w http.ResponseWriter, r *http.Request ) {
 		return
 	}
 
-	if len(params.WorldName) == 0 || len(params.WorldPswd) < 8 {
+	if len(params.World.Name) == 0 || len(params.World.Password) < 8 {
 		http.Error(w, "World Name is empty or Password is too weak", http.StatusConflict)
 		return
 	}
@@ -68,11 +60,9 @@ func (s *Server) CreateVPSHandler( w http.ResponseWriter, r *http.Request ) {
 		User: "admin",
 		SSHKey: key.PublicKey,
 		Volume: volume.Name,
-		WorldName: params.WorldName,
-		WorldPswd: params.WorldPswd,
+		WorldName: params.World.Name,
+		WorldPswd: params.World.Password,
 	}
-
-	fmt.Println(ud.Gen())
 
 	err := s.doc.PostVps(ud, size, image, volume, key)
 	if err != nil {
@@ -80,28 +70,9 @@ func (s *Server) CreateVPSHandler( w http.ResponseWriter, r *http.Request ) {
 		return
 	}
 
-	// Waiting for IP
-	ip,err := wait_for_ip(time.Second*4, 15, s)
-	if err != nil {
-		http.Error(w, "Could not get VPS IP", http.StatusConflict)
-		return
-	}
-	fmt.Println(ip)
-
-	// TODO: Validate that User Image and Volume Exists, Create VPS, Retreive IP and Update DNS
+	s.world.update(params.World.Name, params.World.Password)
 
 	w.WriteHeader(http.StatusOK)
-}
-
-func wait_for_ip(t time.Duration, retries int, s *Server) (string,error) {
-	for _ = range retries {
-		time.Sleep(t)
-		droplet,err := s.doc.GetDroplet()
-		if err != nil { return "", err }
-		if droplet.Ip == "" { continue }
-		return droplet.Ip, nil
-	}
-	return "", fmt.Errorf("Couldn't get VPS' IP")
 }
 
 func is_size_available(slug string, sizes []do.Size) (do.Size, bool) {

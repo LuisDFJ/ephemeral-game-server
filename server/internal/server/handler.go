@@ -1,19 +1,41 @@
 package server
 
 import (
-	"os"
-	"fmt"
-	"crypto/rand"
+	"log"
+	"sync"
 	"crypto/rsa"
+	"crypto/rand"
+	"server/internal/server/db"
 	cf "server/internal/claudflare"
 	do "server/internal/digitalocean"
-	"server/internal/server/db"
 )
 
 
 func fatal(s string) {
-	fmt.Println(s)
-	os.Exit(1)
+	log.Fatal(s)
+}
+
+type World struct {
+	mu sync.Mutex
+	alive bool
+	name string
+	password string
+}
+
+func (w *World) update(name string, password string) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	w.alive = true
+	w.name = name
+	w.password = name
+}
+
+func (w *World) delete() {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	w.alive = false
+	w.name = ""
+	w.password = ""
 }
 
 type Server struct {
@@ -22,6 +44,7 @@ type Server struct {
 	doc do.Client
 	cfc cf.Client
 	db *db.DB
+	world World
 }
 
 func New() Server {
@@ -41,6 +64,6 @@ func New() Server {
 }
 
 func (s *Server) Close() {
-	fmt.Println("Closing Server")
+	log.Println("Closing Server Handler")
 	s.db.Close()
 }

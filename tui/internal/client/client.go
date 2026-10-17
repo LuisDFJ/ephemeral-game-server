@@ -33,8 +33,12 @@ type Registration struct {
 
 type CreateVPS struct {
 	Slug string `json:"slug"`
-	WorldName string `json:"worldname"`
-	WorldPswd string `json:"worldpswd"`
+	World WorldParams `json:"world"`
+}
+
+type WorldParams struct {
+	Name string `json:"name"`
+	Password string `json:"password"`
 }
 
 func Register(ott string, username string, password string, port string) error {
@@ -56,7 +60,6 @@ func New(username string, password string, port string) Client {
 func (c *Client) api_url(s string) string {
 	return fmt.Sprintf("http://localhost%s/%s", c.port, s)
 }
-
 
 func (c *Client) get(slug string) ([]byte, error) {
 	req, err := http.NewRequest(http.MethodGet, c.api_url(slug), nil)
@@ -93,7 +96,7 @@ func (c *Client) post(slug string, b any, jwt bool) ([]byte, error) {
 }
 
 func (c *Client) PostCreateVps( slug string, world_name string, world_pswd string ) ([]byte, error) {
-	return c.post("create-vps", CreateVPS{Slug: slug, WorldName: world_name, WorldPswd: world_pswd}, true)
+	return c.post("create-vps", CreateVPS{Slug: slug, World: WorldParams{Name: world_name, Password: world_pswd}}, true)
 }
 
 func (c *Client) GetStatus() ([]byte, error) {
