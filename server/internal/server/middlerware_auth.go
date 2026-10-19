@@ -1,9 +1,11 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strings"
+
 	jwt "github.com/golang-jwt/jwt/v5"
 )
 
@@ -35,6 +37,7 @@ func (s *Server) AuthMiddleware(next http.HandlerFunc) http.Handler {
 			return
 		}
 
-		next.ServeHTTP(w,r)
+		ctx := context.WithValue(r.Context(), "user", claims.Username)
+		next.ServeHTTP(w,r.WithContext(ctx))
 	})
 }

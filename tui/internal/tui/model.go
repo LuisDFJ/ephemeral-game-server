@@ -5,10 +5,11 @@ import (
 
 	"tui/internal/tui/shared"
 	"tui/internal/tui/status"
-	"tui/internal/tui/view/preview"
-	"tui/internal/tui/view/login"
-	"tui/internal/tui/view/register"
 	"tui/internal/tui/view/home"
+	"tui/internal/tui/view/login"
+	"tui/internal/tui/view/preview"
+	"tui/internal/tui/view/register"
+	"tui/internal/tui/view/selector"
 
 	tea "charm.land/bubbletea/v2"
 )
@@ -21,6 +22,7 @@ type Model struct {
 	login login.Model
 	register register.Model
 	home home.Model
+	selector selector.Model
 }
 
 func New() Model {
@@ -31,6 +33,7 @@ func New() Model {
 		login: login.New(),
 		register: register.New(),
 		home: home.New(),
+		selector: selector.New(),
 	}
 }
 

@@ -6,6 +6,7 @@ import (
 )
 
 type VPS struct {
+	Id int `json:"id"`
 	Alive bool `json:"alive"`
 	Name string `json:"name"`
 	Ip string `json:"ip"`
@@ -15,6 +16,7 @@ type VPS struct {
 func NewVPS( droplet godo.Droplet ) VPS {
 	ip,_ := droplet.PublicIPv4()
 	return VPS {
+		Id: droplet.ID,
 		Alive: true,
 		Name: droplet.Name,
 		Ip: ip,

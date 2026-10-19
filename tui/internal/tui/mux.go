@@ -17,6 +17,7 @@ func (m *Model) muxInit() tea.Cmd {
 	case shared.HomeView:
 		cmd = m.home.Init()
 	case shared.SelectView:
+		cmd = m.selector.Init()
 	}
 	return cmd
 }
@@ -33,6 +34,7 @@ func (m *Model) muxMsg( msg tea.Msg ) tea.Cmd {
 	case shared.HomeView:
 		m.home, cmd = m.home.Update(msg)
 	case shared.SelectView:
+		m.selector, cmd = m.selector.Update(msg)
 	}
 	return cmd
 }
@@ -49,6 +51,7 @@ func (m *Model) muxView() tea.View {
 	case shared.HomeView:
 		view = m.home.View()
 	case shared.SelectView:
+		view = m.selector.View()
 	}
 	return view
 }

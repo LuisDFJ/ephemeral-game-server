@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 )
 
@@ -16,11 +17,6 @@ func (s *Server) StatusHandler(w http.ResponseWriter, r *http.Request) {
 	s.world.mu.Lock()
 	defer s.world.mu.Unlock()
 	
-	if s.world.alive {
-		http.Error(w, "Vps is Offline", http.StatusInternalServerError)
-		return 
-	}
-
 	status := Status{
 		Vps: vps,
 		World: WorldParams{
@@ -32,4 +28,5 @@ func (s *Server) StatusHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(status)
+	log.Printf("VPS status requested by %s", r.Context().Value("user"))
 }

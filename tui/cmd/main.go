@@ -1,12 +1,11 @@
 package main
 
 import (
-	"os"
 	"fmt"
+	"os"
 	"tui/internal/tui"
 	tea "charm.land/bubbletea/v2"
 )
-
 
 func main() {
 	tui := tea.NewProgram(tui.New())

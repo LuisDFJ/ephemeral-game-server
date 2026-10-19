@@ -2,26 +2,16 @@ package home
 
 import (
 	"fmt"
+	"tui/internal/client"
 	"tui/internal/tui/shared"
+	"tui/internal/tui/shared/ansi"
 	"tui/internal/tui/view/selector"
 
 	tea "charm.land/bubbletea/v2"
 )
 
-type Client struct {}
-
-type Info struct {
-	alive bool
-	slug string
-	ip string
-	world string
-	password string
-} 
-
-type Credentials struct {
-	username string
-	password string
-}
+type Credentials client.CredentialsRequest
+type Status client.StatusResponse
 
 type Opion struct {
 	text string
@@ -32,8 +22,7 @@ type Model struct {
 	ready bool
 	blink bool
 	index int
-	info Info
-	client Client
+	status Status
 	credentials Credentials
 	options []Opion
 }
@@ -43,11 +32,11 @@ func New() Model {
 		options: []Opion{
 			Opion{
 				text: "Deploy",
-				callback: func(c Credentials) tea.Cmd {return selector.ChangeToCmd()},
+				callback: func(c Credentials) tea.Cmd {return selector.ChangeToCmd(c.Username, c.Password)},
 			},
 			Opion{
 				text: "Destroy",
-				callback: func(c Credentials) tea.Cmd {return ChangeToCmd(c.username, c.password, shared.ChangeViewCmd(shared.HomeView))},
+				callback: DestroyCallback,
 			},
 		},
 	}
@@ -71,9 +60,9 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 		m.blink = !m.blink
 		return m, TickCmd()
 	case LogInSuccessMsg:
-		m.info = msg.info
+		m.status = msg.status
 		m.credentials = msg.cred
-		if m.info.alive {
+		if m.status.Vps.Alive {
 			m.index = 1
 		} else {
 			m.index = 0
@@ -94,10 +83,14 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 func (m Model) View() tea.View {
 	if !m.ready { return tea.NewView("") }
 
-	status := "Server Status: offline"
-	if m.info.alive {
-		status = fmt.Sprintf("Server Status: online\nIP: %s\nSpecs: %s\nWorld: %s    Password: %s",
-			m.info.ip, m.info.slug, m.info.world, m.info.password,
+	status := "Server Status: " + ansi.ERROR.Print("offline")
+	if m.status.Vps.Alive {
+		status = fmt.Sprintf("Server Status: %s\nIP: %s\nSpecs: %s\nWorld: %s    Password: %s",
+			ansi.INFO.Print("online"),
+			ansi.INFO.Print(m.status.Vps.Ip),
+			ansi.INFO.Print(m.status.Vps.Specs),
+			ansi.INFO.Print(m.status.World.Name),
+			ansi.INFO.Print(m.status.World.Password),
 		)
 	}
 	option := m.options[m.index].text

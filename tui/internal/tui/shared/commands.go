@@ -6,7 +6,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 )
 
-const MsgTimeout = time.Second * 3
+const MsgTimeout = time.Second * 5
 const BlinkDuration = time.Millisecond * 400
 
 type View int

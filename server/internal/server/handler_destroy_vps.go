@@ -1,6 +1,9 @@
 package server
 
-import "net/http"
+import (
+	"log"
+	"net/http"
+)
 
 func (s *Server) DestroyVPSHandler( w http.ResponseWriter, r *http.Request ) {
 	vps,err := s.doc.GetDroplet()
@@ -14,11 +17,12 @@ func (s *Server) DestroyVPSHandler( w http.ResponseWriter, r *http.Request ) {
 		return
 	}
 
-	err = s.doc.DelVps()
+	err = s.doc.DelVps(vps.Id)
 	if err != nil {
 		http.Error(w, "Unable to destroy VPS, consider retrying", http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
+	log.Printf("VPS destroyed by %s", r.Context().Value("user"))
 }

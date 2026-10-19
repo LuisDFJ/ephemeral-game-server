@@ -2,6 +2,7 @@ package home
 
 import (
 	"time"
+	"tui/internal/client"
 	"tui/internal/tui/shared"
 
 	tea "charm.land/bubbletea/v2"
@@ -18,7 +19,7 @@ func ReadyCmd(ready bool) tea.Cmd {
 }
 
 type LogInSuccessMsg struct {
-	info Info
+	status Status
 	cred Credentials
 }
 
@@ -29,14 +30,18 @@ type LogInFailureMsg struct {
 
 func SetupCmd(username string, password string, fallback tea.Cmd) tea.Cmd {
 	return func() tea.Msg {
-		time.Sleep(time.Second * 2)
-		if username == "admin" && password == "password" {
-			return LogInSuccessMsg{
-				info: Info{alive: true, slug: "c-2", ip: "1.1.1.1", world: "World", password: "password"},
-				cred: Credentials{username: username, password: password},
-			}
+		c, err := client.New(username, password, "http://localhost:8080")
+		if err != nil {
+			return LogInFailureMsg{err: "Log In Failed: " + err.Error(), fallback: fallback}
 		}
-		return LogInFailureMsg{err: "Log In Failed", fallback: fallback}
+		status, err := c.GetStatus()
+		if err != nil {
+			return LogInFailureMsg{err: "Could not get Status: " + err.Error(), fallback: fallback}
+		}
+		return LogInSuccessMsg{
+			status: Status(status),
+			cred: Credentials{Username: username, Password: password},
+		}
 	}
 }
 
@@ -44,5 +49,34 @@ func ChangeToCmd(username string, password string, fallback tea.Cmd) tea.Cmd {
 	return tea.Sequence(
 		shared.ChangeViewCmd(shared.HomeView),
 		shared.LoadableCmd(SetupCmd(username,password, fallback)),
+	)
+}
+
+func DestroyCmd(username string, password string) tea.Cmd {
+	return func() tea.Msg {
+		c, err := client.New(username, password, "http://localhost:8080")
+		if err != nil {
+			return LogInFailureMsg{err: "Authentication Failure: " + err.Error(), fallback: shared.ChangeViewCmd(shared.LoginView)}
+		}
+		err = c.PostDestroyVps()
+		if err != nil {
+			return LogInFailureMsg{err: "Could not destroy VPS: " + err.Error(), fallback: shared.ChangeViewCmd(shared.HomeView)}
+		}
+		time.Sleep(2*time.Second)
+		status, err := c.GetStatus()
+		if err != nil {
+			return LogInFailureMsg{err: "Could not get Status: " + err.Error(), fallback: shared.ChangeViewCmd(shared.LoginView)}
+		}
+		return LogInSuccessMsg{
+			status: Status(status),
+			cred: Credentials{Username: username, Password: password},
+		}
+	}
+}
+
+func DestroyCallback(cred Credentials) tea.Cmd {
+	return tea.Sequence(
+		ReadyCmd(false),
+		shared.LoadableCmd(DestroyCmd(cred.Username, cred.Password)),
 	)
 }
