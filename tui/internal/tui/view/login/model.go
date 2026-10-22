@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"tui/internal/tui/components/text"
+	"tui/internal/tui/shared"
 	"tui/internal/tui/view/home"
 
 	tea "charm.land/bubbletea/v2"
@@ -25,7 +26,7 @@ func New() Model {
 }
 
 func (m *Model) Init() tea.Cmd {
-	return TickCmd()
+	return nil
 }
 
 func (m Model) Update(msg tea.Msg) (Model,tea.Cmd) {
@@ -33,6 +34,9 @@ func (m Model) Update(msg tea.Msg) (Model,tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.Key().Code {
+		case tea.KeyTab:
+			m.index = (m.index + 1) % len(m.options)
+			return m,nil
 		case tea.KeyUp:
 			m.index = max(m.index - 1, 0)
 			return m, nil
@@ -45,7 +49,7 @@ func (m Model) Update(msg tea.Msg) (Model,tea.Cmd) {
 			return m, home.ChangeToCmd(username, password, ChangeToCmd())
 		}
 		m.options[m.index], cmd = m.options[m.index].Update(msg)
-	case TickMsg:
+	case shared.TickMsg:
 		m.blink = !m.blink
 		for i := range m.options {
 			if i == m.index {
@@ -54,7 +58,7 @@ func (m Model) Update(msg tea.Msg) (Model,tea.Cmd) {
 				m.options[i].Blink(false)
 			}
 		}
-		return m, TickCmd()
+		return m, nil
 	}
 	return m, cmd
 }

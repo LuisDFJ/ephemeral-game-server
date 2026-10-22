@@ -13,7 +13,7 @@ func (c *Client) PostVps( ud userdata.Params, size Size, image Image, volume Vol
 
 	_,_,err := c.client.Droplets.Create(c.ctx, &godo.DropletCreateRequest{
 		Name: VALHEIM_DROPLET,
-		Region: REGION,
+		Region: c.region,
 		Size: size.Slug,
 		Image: godo.DropletCreateImage{ID: image.ID},
 		Volumes: []godo.DropletCreateVolume{

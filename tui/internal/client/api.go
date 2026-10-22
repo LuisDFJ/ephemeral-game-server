@@ -3,17 +3,18 @@ package client
 import (
 	"bytes"
 	"encoding/json"
+	"os"
 )
 
 
-func (c *Client) PostCreateVps( slug string, world_name string, world_pswd string ) error {
+func (c *Client) PostCreateVps( slug string ) error {
 	_,err := c.post(
 		"create-vps",
 		CreateVPSRequest{
 			Slug: slug,
 			World: WorldParams{
-				Name: world_name,
-				Password: world_pswd,
+				Name: os.Getenv("VALHEIM_WORLD"),
+				Password: os.Getenv("VALHEIM_PASSWORD"),
 			},
 		},
 		true)

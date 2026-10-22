@@ -38,7 +38,7 @@ func New() Model {
 }
 
 func (m Model) Init() tea.Cmd {
-	return shared.ChangeViewCmd(shared.PreView)
+	return tea.Batch(shared.ChangeViewCmd(shared.PreView), shared.TickCmd())
 }
 
 func (m Model) Update(msg tea.Msg) (tea.Model,tea.Cmd) {
@@ -53,6 +53,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model,tea.Cmd) {
 	case shared.ChangeViewMsg:
 		m.view = shared.View(msg)
 		return m, m.muxInit()
+	case shared.TickMsg:
+		cmds = append(cmds, shared.TickCmd())
 	}
 
 	var cmd tea.Cmd

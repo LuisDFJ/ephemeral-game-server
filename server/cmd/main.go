@@ -1,17 +1,17 @@
 package main
 
 import (
-	"os"
+	"context"
+	"errors"
 	"fmt"
 	"log"
-	"time"
-	"errors"
-	"context"
-	"syscall"
 	"net/http"
+	"os"
 	"os/signal"
 	"server/internal/cli"
 	"server/internal/server"
+	"syscall"
+	"time"
 )
 
 const PORT = ":8080"
@@ -26,6 +26,10 @@ func init_server() func() {
 	mux.Handle("GET /available-sizes", handler.AuthMiddleware(handler.AvailableSizesHandler))
 	mux.Handle("POST /create-vps", handler.AuthMiddleware(handler.CreateVPSHandler))
 	mux.Handle("POST /destroy-vps", handler.AuthMiddleware(handler.DestroyVPSHandler))
+	mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintln(w, "ok")
+	})
 
 	srv := http.Server{
 		Addr: PORT,

@@ -25,6 +25,11 @@ func ChangeViewCmd(view View) tea.Cmd {
 	}
 }
 
+type TickMsg struct {}
+func TickCmd() tea.Cmd {
+	return tea.Tick(BlinkDuration, func(t time.Time) tea.Msg {return TickMsg{}})
+}
+
 type LoadingMsg bool
 func LoadingCmd(load bool) tea.Cmd {
 	return func() tea.Msg {

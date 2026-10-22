@@ -23,7 +23,7 @@ func (c *Client) GetVolume() (Volume, error) {
 	var volume Volume
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	volumes, _, err := c.client.Storage.ListVolumes(c.ctx, &godo.ListVolumeParams{Region: REGION})
+	volumes, _, err := c.client.Storage.ListVolumes(c.ctx, &godo.ListVolumeParams{Region: c.region})
 	if err != nil {
 		return volume, fmt.Errorf("failed to list volumes: %v\n", err)
 	}

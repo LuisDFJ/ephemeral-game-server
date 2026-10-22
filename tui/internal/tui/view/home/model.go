@@ -32,7 +32,7 @@ func New() Model {
 		options: []Opion{
 			Opion{
 				text: "Deploy",
-				callback: func(c Credentials) tea.Cmd {return selector.ChangeToCmd(c.Username, c.Password)},
+				callback: func(c Credentials) tea.Cmd {return selector.ChangeToCmd(c.Username, c.Password, ChangeToCmd(c.Username,c.Password,shared.ChangeViewCmd(shared.LoginView)))},
 			},
 			Opion{
 				text: "Destroy",
@@ -43,12 +43,13 @@ func New() Model {
 }
 
 func (m Model) Init() tea.Cmd {
-	return tea.Sequence(ReadyCmd(false), TickCmd())
+	return ReadyCmd(false)
 }
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
+		if !m.ready { return m,nil }
 		switch msg.Key().Code {
 		case tea.KeyEnter:
 			return m, m.options[m.index].callback(m.credentials)
@@ -56,9 +57,9 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	case ReadyMsg:
 		m.ready = bool(msg)
 		return m, nil
-	case TickMsg:
+	case shared.TickMsg:
 		m.blink = !m.blink
-		return m, TickCmd()
+		return m, nil
 	case LogInSuccessMsg:
 		m.status = msg.status
 		m.credentials = msg.cred

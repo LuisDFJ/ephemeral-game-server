@@ -19,6 +19,7 @@ type Model struct {
 	index int
 	credentials Credentials
 	sizes []Size
+	fallback tea.Cmd
 }
 
 func Header() string {
@@ -50,16 +51,19 @@ func New() Model {
 }
 
 func (m Model) Init() tea.Cmd {
-	return tea.Sequence(ReadyCmd(false), TickCmd())
+	return ReadyCmd(false)
 }
 
 func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
+		if !m.ready { return m,nil }
 		switch msg.Key().Code {
 		case tea.KeyEnter:
-			//return m, CreateVpsCmd(m.credentials, m.sizes[m.index])
-			return m, nil
+			return m, CreateVpsCmd(m.credentials.Username, m.credentials.Password, m.sizes[m.index], m.fallback)
+		case tea.KeyTab:
+			m.index = (m.index + 1) % len(m.sizes)
+			return m,nil
 		case tea.KeyUp:
 			m.index = max(0,m.index - 1)
 			return m, nil
@@ -70,22 +74,24 @@ func (m Model) Update(msg tea.Msg) (Model, tea.Cmd) {
 	case ReadyMsg:
 		m.ready = bool(msg)
 		return m, nil
-	case TickMsg:
+	case shared.TickMsg:
 		m.blink = !m.blink
-		return m, TickCmd()
+		return m, nil
 	case SelectSuccess:
 		m.credentials = msg.cred
 		m.sizes = msg.sizes
+		m.fallback = msg.fallback
 		return m, tea.Batch(
 			ReadyCmd(true),
 			shared.SendStatusCmd( "Operation Succeded", false ),
 		)
 	case SelectFailure:
-
 		return m, tea.Batch(
-			shared.ChangeViewCmd(shared.LoginView),
+			msg.fallback,
 			shared.SendStatusCmd( msg.err, true ),
 		)
+	case VpsCreationSuccessMsg:
+		return m, shared.SendStatusCmd( "VPS created", false )
 	}
 	return m, nil
 }
@@ -96,7 +102,7 @@ func (m Model) View() tea.View {
 	s = append(s, Header())
 	for i := range m.sizes {
 		d := m.sizes[i].Display()
-		if m.index == i && m.blink {
+		if m.index == i {
 			d = ansi.LIGHT.Print(d)
 		}
 		s = append(s,d)

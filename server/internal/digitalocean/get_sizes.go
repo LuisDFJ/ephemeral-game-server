@@ -35,14 +35,14 @@ func (c *Client) GetSizes() ([]Size, error) {
 		return res, fmt.Errorf("failed to list droplets: %v\n", err)
 	}
 	for i := range sizes {
-		if isValidSize(&sizes[i]) {
+		if isValidSize(&sizes[i], c.region) {
 			res = append(res, NewSize(sizes[i]))
 		}
 	}
 	return res,nil
 }
 
-func isValidSize(size *godo.Size) bool {
-	region := slices.Contains(size.Regions, REGION)
+func isValidSize(size *godo.Size, reg string) bool {
+	region := slices.Contains(size.Regions, reg)
 	return size.Available && size.Memory >= 4000 && size.Vcpus >= 2 && region && size.PriceMonthly <= MAX_PRICE
 }

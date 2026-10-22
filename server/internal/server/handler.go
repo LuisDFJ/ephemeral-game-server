@@ -27,7 +27,7 @@ func (w *World) update(name string, password string) {
 	defer w.mu.Unlock()
 	w.alive = true
 	w.name = name
-	w.password = name
+	w.password = password
 }
 
 func (w *World) delete() {

@@ -3,6 +3,7 @@ package preview
 import (
 	"fmt"
 	"strings"
+	"tui/internal/tui/shared"
 	"tui/internal/tui/view/login"
 	"tui/internal/tui/view/register"
 
@@ -36,13 +37,16 @@ func New() Model {
 }
 
 func (m Model) Init() tea.Cmd {
-	return TickCmd()
+	return nil
 }
 
 func (m Model) Update(msg tea.Msg) (Model,tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.Key().Code {
+		case tea.KeyTab:
+			m.index = (m.index + 1) % len(m.options)
+			return m,nil
 		case tea.KeyUp:
 			m.index = max(m.index - 1, 0)
 		case tea.KeyDown:
@@ -50,9 +54,9 @@ func (m Model) Update(msg tea.Msg) (Model,tea.Cmd) {
 		case tea.KeyEnter:
 			return m, m.options[m.index].callback
 		}
-	case TickMsg:
+	case shared.TickMsg:
 		m.blink = !m.blink
-		return m, TickCmd()
+		return m, nil
 	}
 	return m, nil
 }

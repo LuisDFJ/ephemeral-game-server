@@ -1,8 +1,11 @@
 package db
 
 import (
-	"sync"
 	"database/sql"
+	"fmt"
+	"os"
+	"sync"
+
 	_ "github.com/glebarez/go-sqlite"
 )
 
@@ -12,7 +15,9 @@ type DB struct {
 }
 
 func New() (*DB,error) {
-	db, err := sql.Open("sqlite", "./database.db")
+	path := os.Getenv("DB_PATH")
+	if path == "" { return nil, fmt.Errorf("No DB_PATH provided") }
+	db, err := sql.Open("sqlite", path)
 	if err != nil { return nil, err }
 	d := &DB{db:db}
 	err = d.populate_database()

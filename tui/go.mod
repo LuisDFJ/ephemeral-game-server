@@ -2,7 +2,10 @@ module tui
 
 go 1.27.1
 
-require charm.land/bubbletea/v2 v2.1.0
+require (
+	charm.land/bubbletea/v2 v2.1.0
+	github.com/joho/godotenv v1.5.1
+)
 
 require (
 	github.com/charmbracelet/colorprofile v0.4.3 // indirect

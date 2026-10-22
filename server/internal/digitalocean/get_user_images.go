@@ -30,7 +30,7 @@ func (c *Client) GetImage() (Image, error) {
 		return image, fmt.Errorf("failed to list images: %v\n", err)
 	}
 	for i := range images {
-		region := slices.Contains(images[i].Regions, REGION)
+		region := slices.Contains(images[i].Regions, c.region)
 		if images[i].Name == VALHEIM_IMAGE && region {
 			image = NewImage(images[i])
 			break

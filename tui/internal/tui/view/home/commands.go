@@ -8,11 +8,6 @@ import (
 	tea "charm.land/bubbletea/v2"
 )
 
-type TickMsg struct {}
-func TickCmd() tea.Cmd {
-	return tea.Tick(shared.BlinkDuration, func(t time.Time) tea.Msg {return TickMsg{}})
-}
-
 type ReadyMsg bool
 func ReadyCmd(ready bool) tea.Cmd {
 	return func() tea.Msg { return ReadyMsg(ready) }
@@ -30,7 +25,7 @@ type LogInFailureMsg struct {
 
 func SetupCmd(username string, password string, fallback tea.Cmd) tea.Cmd {
 	return func() tea.Msg {
-		c, err := client.New(username, password, "http://localhost:8080")
+		c, err := client.New(username, password)
 		if err != nil {
 			return LogInFailureMsg{err: "Log In Failed: " + err.Error(), fallback: fallback}
 		}
@@ -54,7 +49,7 @@ func ChangeToCmd(username string, password string, fallback tea.Cmd) tea.Cmd {
 
 func DestroyCmd(username string, password string) tea.Cmd {
 	return func() tea.Msg {
-		c, err := client.New(username, password, "http://localhost:8080")
+		c, err := client.New(username, password)
 		if err != nil {
 			return LogInFailureMsg{err: "Authentication Failure: " + err.Error(), fallback: shared.ChangeViewCmd(shared.LoginView)}
 		}
@@ -62,15 +57,8 @@ func DestroyCmd(username string, password string) tea.Cmd {
 		if err != nil {
 			return LogInFailureMsg{err: "Could not destroy VPS: " + err.Error(), fallback: shared.ChangeViewCmd(shared.HomeView)}
 		}
-		time.Sleep(2*time.Second)
-		status, err := c.GetStatus()
-		if err != nil {
-			return LogInFailureMsg{err: "Could not get Status: " + err.Error(), fallback: shared.ChangeViewCmd(shared.LoginView)}
-		}
-		return LogInSuccessMsg{
-			status: Status(status),
-			cred: Credentials{Username: username, Password: password},
-		}
+		time.Sleep(10*time.Second)
+		return shared.SendStatusCmd("Succesfully destroyed VPS", false)
 	}
 }
 
@@ -78,5 +66,6 @@ func DestroyCallback(cred Credentials) tea.Cmd {
 	return tea.Sequence(
 		ReadyCmd(false),
 		shared.LoadableCmd(DestroyCmd(cred.Username, cred.Password)),
+		ChangeToCmd(cred.Username, cred.Password, shared.ChangeViewCmd(shared.LoginView)),
 	)
 }
