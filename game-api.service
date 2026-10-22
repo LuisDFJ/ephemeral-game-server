@@ -1,0 +1,23 @@
+[Unit]
+Description=Go Game Nginx API
+After=network.target
+Wants=nginx.service
+
+[Service]
+Type=simple
+User=http
+Group=http
+WorkingDirectory=/etc/game-api
+ExecStart=/usr/local/bin/game-api
+Restart=on-failure
+RestartSec=5
+KillSignal=SIGTERM
+TimeoutStopSec=20
+
+StateDirectory=game-api
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target
