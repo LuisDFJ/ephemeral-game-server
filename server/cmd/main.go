@@ -12,6 +12,8 @@ import (
 	"server/internal/server"
 	"syscall"
 	"time"
+
+	"github.com/joho/godotenv"
 )
 
 const PORT = ":8080"
@@ -76,6 +78,8 @@ func fatal(err error) {
 
 func main() {
 	if len(os.Args) != 1 {
+		err := godotenv.Load(".env")
+		fatal(err)
 		switch os.Args[1] {
 		case "gen-ott":
 			token,err := cli.CreateOTT()
