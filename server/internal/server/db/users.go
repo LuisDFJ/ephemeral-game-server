@@ -2,7 +2,6 @@ package db
 
 import (
 	"fmt"
-
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -21,7 +20,6 @@ func (db *DB) insert_user( username string, hash string ) error {
 }
 
 var AuthErr = fmt.Errorf("auth error")
-
 func (db *DB) AuthUser(username string, password string) error {
 	hash := db.get_user_hash(username)
 	if hash == "" { return AuthErr }

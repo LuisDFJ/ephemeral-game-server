@@ -1,13 +1,14 @@
 package server
 
 import (
-	"log"
-	"sync"
-	"crypto/rsa"
 	"crypto/rand"
-	"server/internal/server/db"
+	"crypto/rsa"
+	"log"
 	cf "server/internal/claudflare"
 	do "server/internal/digitalocean"
+	"server/internal/server/db"
+	"sync"
+	"time"
 )
 
 
@@ -45,25 +46,37 @@ type Server struct {
 	cfc cf.Client
 	db *db.DB
 	world World
+	kill_watch chan<- bool
+	done_watch <-chan bool
+
 }
 
-func New() Server {
+func New() *Server {
 	key, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil { fatal("error generating key") }
 	dot,cft,err := load_tokens()
 	if err != nil { fatal(err.Error()) }
 	db,err := db.New()
 	if err != nil { fatal(err.Error()) }
-	return Server{
+	s := &Server{
 		key: key,
 		pub: &key.PublicKey,
 		doc: do.New(dot),
 		cfc: cf.New(cft),
 		db: db,
 	}
+	s.startWatcher()
+	return s
 }
 
 func (s *Server) Close() {
+	s.kill_watch <- true
+	select {
+	case <-s.done_watch:
+		log.Println("Watcher Succesfully Killed")
+	case <-time.After(5*time.Second):
+		log.Println("Watcher Timed-out")
+	}
 	log.Println("Closing Server Handler")
 	s.db.Close()
 }

@@ -2,6 +2,7 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	do "server/internal/digitalocean"
@@ -73,7 +74,9 @@ func (s *Server) CreateVPSHandler( w http.ResponseWriter, r *http.Request ) {
 
 	s.world.update(params.World.Name, params.World.Password)
 	w.WriteHeader(http.StatusOK)
-	log.Printf("VPS created by %s", r.Context().Value("user"))
+	user := fmt.Sprintf("%s", r.Context().Value("user"))
+	log.Printf("VPS created by %s", user)
+	s.db.InsertLog(user)
 }
 
 func is_size_available(slug string, sizes []do.Size) (do.Size, bool) {

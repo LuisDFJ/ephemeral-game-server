@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"sync"
-
 	_ "github.com/glebarez/go-sqlite"
 )
 
@@ -44,9 +43,16 @@ func (d *DB) populate_database() error {
 		username TEXT NOT NULL UNIQUE,
 		password TEXT NOT NULL
 	);`
+	sql_vps := `CREATE TABLE IF NOT EXISTS vps_log (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		username TEXT NOT NULL,
+		timestamp INTEGER
+	);`
 	_,err := d.db.Exec(sql_ott)
 	if err != nil { return err }
 	_,err = d.db.Exec(sql_user)
+	if err != nil { return err }
+	_,err = d.db.Exec(sql_vps)
 	return err
 }
 
